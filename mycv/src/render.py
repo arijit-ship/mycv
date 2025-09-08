@@ -1,110 +1,77 @@
-# CV Themes
+import os
+from jinja2 import Environment, FileSystemLoader
+import subprocess
+from pathlib import Path
 
-This folder contains **themes/templates** for the modular CV system.  
-Each theme defines the **look and layout** of the CV when rendered from YAML/JSON data.  
+class CVRenderer:
+    """
+    Flexible CV Renderer using Jinja2 templates.
+    Supports multiple formats: LaTeX, HTML, Markdown, Word (docx), and plain text.
+    """
 
----
+    def __init__(self, cv_data, template_path, output_dir="output"):
+        """
+        :param cv_data: dict, CV data loaded from YAML/JSON
+        :param template_path: str or Path, path to the template file
+        :param output_dir: str, folder to save rendered files
+        """
+        self.cv_data = cv_data
+        self.template_path = Path(template_path)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
-## Folder Structure
+        if not self.template_path.exists():
+            raise FileNotFoundError(f"Template '{template_path}' not found.")
 
-```
+        # Determine file type from extension
+        self.file_type = self.template_path.suffix.lower()
 
-themes/
-├── classic/
-│   └── template.tex
-├── modern/
-│   └── template.tex
-├── fancy/
-│   └── template.html
-└── minimal/
-└── template.md
+    def render(self, output_name="cv"):
+        """
+        Render the template with CV data.
+        :param output_name: base name for output file (without extension)
+        :return: path to rendered file
+        """
+        env = Environment(
+            loader=FileSystemLoader(str(self.template_path.parent)),
+            autoescape=False
+        )
+        template = env.get_template(self.template_path.name)
+        rendered_content = template.render(cv=self.cv_data)
 
-````
+        # Determine output file based on template type
+        output_file = self.output_dir / f"{output_name}{self.template_path.suffix.lower()}"
 
-- Each subfolder represents a **theme**.
-- The `template.*` file can be in **any format** (LaTeX, HTML, Markdown, plain text, etc.).
-- The **CV data** comes from `mycv.yaml` or `mycv.json` and is filled into the template using **Jinja2 placeholders**.
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(rendered_content)
 
----
+        return output_file
 
-## How to Create a New Theme
+    def compile_pdf(self, rendered_file):
+        """
+        Compile rendered file into PDF (only LaTeX or HTML currently supported).
+        :param rendered_file: Path or str to the rendered file
+        :return: Path to PDF file or None if failed/unsupported
+        """
+        rendered_file = Path(rendered_file)
+        pdf_file = self.output_dir / f"{rendered_file.stem}.pdf"
 
-1. Create a new folder under `themes/`, e.g., `themes/professional/`.
-2. Add a template file (`template.tex`, `template.html`, etc.) inside the folder.
-3. Use **Jinja2 placeholders** to insert CV data. Example for LaTeX:
+        if rendered_file.suffix.lower() == ".tex":
+            try:
+                subprocess.run(
+                    ["pdflatex", "-interaction=nonstopmode", "-output-directory", str(self.output_dir), str(rendered_file)],
+                    check=True
+                )
+                return pdf_file
+            except subprocess.CalledProcessError:
+                raise RuntimeError("LaTeX compilation failed. Check your template and LaTeX installation.")
 
-```latex
-\section*{Personal Info}
-Name: {{ cv.personal_info.name }} \\
-Email: {{ cv.personal_info.email }} \\
-Phone: {{ cv.personal_info.phone }}
-````
-
-4. Loop over lists using `{% for ... %}`:
-
-```latex
-\section*{Education}
-{% for edu in cv.education %}
-- {{ edu.degree }} | {{ edu.institution }} | {{ edu.period }}
-  {% if edu.notes %}
-    {% for note in edu.notes %}
-      \newline {{ note }}
-    {% endfor %}
-  {% endif %}
-{% endfor %}
-```
-
-5. Use conditionals to check optional sections:
-
-```latex
-{% if cv.about.summary %}
-\section*{About}
-{{ cv.about.summary }}
-{% endif %}
-```
-
----
-
-## Available CV Data Fields
-
-Your template can access the following fields from `cv`:
-
-* `cv.personal_info` – dictionary with name, email, phone, github, linkedin, address
-* `cv.about` – dictionary with summary
-* `cv.education` – list of dictionaries
-* `cv.experience` – list of dictionaries
-* `cv.skills` – dictionary with `languages` and `technologies`
-* `cv.projects` – list of dictionaries
-* `cv.certificates` – list of dictionaries
-* `cv.presentations` – list of dictionaries
-
-You can also fetch any **custom section** using:
-
-```jinja
-{{ cv.get_section('section_name') }}
-```
-
----
-
-## Notes
-
-* Templates are **fully flexible**. You can use any valid LaTeX, HTML, Markdown, or plain text formatting.
-* Keep your template clean and organized; all dynamic data should be inserted via Jinja2 placeholders.
-* If using LaTeX, the `CVRenderer` class can compile the rendered `.tex` file into PDF automatically.
-
----
-
-## Example
-
-```bash
-python mycv/src/render.py --template themes/classic/template.tex
-```
-
-This will:
-
-1. Load the CV data from `mycv.yaml`.
-2. Render the LaTeX template with placeholders replaced.
-3. Output `cv.tex` and compile it into `cv.pdf` (if LaTeX).
-
-```
-```
+        elif rendered_file.suffix.lower() == ".html":
+            try:
+                import pdfkit
+                pdfkit.from_file(str(rendered_file), str(pdf_file))
+                return pdf_file
+            except ImportError:
+                raise ImportError("pdfkit not installed. Install via 'pip install pdfkit' and wkhtmltopdf.")
+        else:
+            raise NotImplementedError(f"PDF compilation not supported for '{rendered_file.suffix}' yet.")
