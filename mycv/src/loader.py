@@ -1,82 +1,40 @@
-# mycv/src/loader.py
-
-import yaml
-import json
 import os
+import yaml
 from cerberus import Validator
 
-class CVLoader:
-    """
-    Dynamic CV Loader
-    - Loads YAML or JSON CV files
-    - Validates against a schema
-    - Provides dynamic access to sections and keys
-    """
 
-    def __init__(self, data_file, schema_file="mycv/settings/schema.yaml"):
-        if not os.path.exists(data_file):
-            raise FileNotFoundError(f"CV data file {data_file} not found.")
-        if not os.path.exists(schema_file):
-            raise FileNotFoundError(f"Schema file {schema_file} not found.")
-        
+class CVLoader:
+    def __init__(self, data_file, schema_file):
         self.data_file = data_file
         self.schema_file = schema_file
-        self.cv_data = None
+        self.data = None
         self.schema = None
         self._load_schema()
         self._load_data()
 
     def _load_schema(self):
-        """Load YAML schema"""
-        with open(self.schema_file, "r") as f:
+        """Load YAML schema definition."""
+        if not os.path.exists(self.schema_file):
+            raise FileNotFoundError(f"Schema file {self.schema_file} not found.")
+        with open(self.schema_file, "r", encoding="utf-8") as f:
             self.schema = yaml.safe_load(f)
 
     def _load_data(self):
-        """Load YAML or JSON data and validate"""
-        ext = os.path.splitext(self.data_file)[1].lower()
-        with open(self.data_file, "r") as f:
-            if ext in [".yaml", ".yml"]:
-                self.cv_data = yaml.safe_load(f)
-            elif ext == ".json":
-                self.cv_data = json.load(f)
-            else:
-                raise ValueError("Unsupported file format. Use YAML or JSON.")
+        """Load CV YAML data and validate."""
+        if not os.path.exists(self.data_file):
+            raise FileNotFoundError(f"Data file {self.data_file} not found.")
+        with open(self.data_file, "r", encoding="utf-8") as f:
+            self.data = yaml.safe_load(f)
 
         self._validate_data()
 
     def _validate_data(self):
-        """Validate the loaded CV against schema"""
-        v = Validator(self.schema, allow_unknown=True)
-        if not v.validate(self.cv_data):
-            raise ValueError(f"CV data validation failed: {v.errors}")
+        """Validate CV data against schema using Cerberus."""
+        v = Validator(self.schema)
+        v.allow_unknown = True  # allow arbitrary fields in contents
+        if not v.validate(self.data):
+            raise ValueError(f"Invalid CV data: {v.errors}")
 
-    # ---------------------------
-    # Dynamic access methods
-    # ---------------------------
     def get_sections(self):
-        """Return all top-level section keys"""
-        return list(self.cv_data.keys())
-
-    def get_section(self, section_key):
-        """Return content dict of a section, or None if section not exists"""
-        return self.cv_data.get(section_key)
-
-    def get_content(self, section_key, key=None):
-        """
-        Get content inside a section
-        If key is None, return full content dict
-        Otherwise return the value for that key (or None if missing)
-        """
-        section = self.cv_data.get(section_key)
-        if not section:
-            return None
-        content = section.get("content")
-        if content is None:
-            return None
-        if key:
-            return content.get(key) if isinstance(content, dict) else None
-        return content
-
-    def all_data(self):
-        """Return the full loaded CV"""
-        return self.cv_data
+        """Return the list of sections."""
+        return self.data.get("cv", {}).get("sections", [])
