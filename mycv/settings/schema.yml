@@ -1,0 +1,47 @@
+# CV Schema Definition
+type: object
+patternProperties:
+  ".*":                     # Any top-level section key
+    type: object
+    required:
+      - heading
+      - content
+    properties:
+      heading:
+        type: string
+      content:
+        type: object
+        # Each section can have specific keys; all keys listed here are optional
+        properties:
+          # Example keys, optional
+          name: { type: string }
+          date_of_birth: { type: string }
+          nationality: { type: string }
+          email: { type: array, items: { type: string } }
+          github: { type: string }
+          linkedin: { type: string }
+          location: { type: string }
+          languages: { type: array, items: { type: string } }
+
+          degree: { type: string }
+          institution: { type: string }
+          period: { type: string }
+          notes: { type: array, items: { type: string } }
+
+          position: { type: string }
+          company: { type: string }
+          details: { type: array, items: { type: string } }
+
+          category: { type: string }
+          items: { type: array, items: { type: string } }
+
+          project_name: { type: string }
+          link: { type: string }
+          technologies: { type: array, items: { type: string } }
+
+          title: { type: string }
+          event: { type: string }
+          authors: { type: array, items: { type: string } }
+
+        additionalProperties: true  # Allow extra keys inside content
+    additionalProperties: true
