@@ -9,10 +9,10 @@ cv:
     - heading: "Education"
       contents:
         - degree: "PhD in Computer History"
-          institution: "Osaka University"
+          institution: "Osaka High School"
           year: "2025"
         - degree: "MSc in Physics"
-          institution: "IIT Mars"
+          institution: "ElonMars academia"
           year: "2021"
 
     - heading: "Experience"
