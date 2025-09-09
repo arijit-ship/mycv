@@ -1,26 +1,32 @@
-About Me:
-  name: str
-  email: str
-  summary: str
-
-Education:
-  degree: str
-  institution: str
-  year: str
-
-Experience:
-  role: str
-  company: str
-  duration: str
-  description:
-    summary: str
-    details: list
-
-Projects:
-  title: str
-  description: str
-  technologies: list
-
-Skills:
-  languages: str
-  tools: str
+type: object
+properties:
+  name:
+    type: string
+  contact:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+      phone:
+        type: string
+      linkedin:
+        type: string
+  experience:
+    type: array
+    items:
+      type: object
+      properties:
+        company:
+          type: string
+        title:
+          type: string
+        start_date:
+          type: string
+        end_date:
+          type: string
+        description:
+          type: string
+required:
+  - name
+  - contact

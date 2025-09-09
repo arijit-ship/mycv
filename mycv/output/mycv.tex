@@ -22,40 +22,51 @@
 
 % --- Header Section ---
 \begin{center}
-    \textbf{\Large ((( name | upper )))} \\
+    \textbf{\Large JOHN DOE} \\
     \vspace{2pt}
     \small
-    \faPhone\ ((( contact.phone ))) \quad \faEnvelope\ ((( contact.email ))) \quad \faLinkedin\ ((( contact.linkedin )))
+    \faPhone\ +1 (123) 456-7890 \quad \faEnvelope\ john.doe@email.com \quad \faLinkedin\ linkedin.com/in/johndoe
 \end{center}
 
 \vspace{10pt}
 
 % --- Experience Section ---
 \section{Experience}
-((% for job in experience %))
-    \subsection{((( job.title )))}
-    \small\textit{((( job.company )))} \hfill \textit{((( job.start_date ))) -- ((( job.end_date )))}
+
+    \subsection{Software Engineer}
+    \small\textit{Tech Corp} \hfill \textit{Jan 2023 -- Present}
     \vspace{2pt}
     \begin{itemize}[leftmargin=*,noitemsep,nolistsep]
-        \item ((( job.description )))
+        \item Developed and maintained backend services.
     \end{itemize}
-((% endfor %))
+
+    \subsection{Junior Developer}
+    \small\textit{Innovate Inc.} \hfill \textit{Jun 2021 -- Dec 2022}
+    \vspace{2pt}
+    \begin{itemize}[leftmargin=*,noitemsep,nolistsep]
+        \item Collaborated on a team to build a web application.
+    \end{itemize}
+
 
 % --- Education Section ---
 \section{Education}
-((% for edu in education %))
-    \subsection{((( edu.degree )))}
-    \small\textit{((( edu.university )))} \hfill \textit{((( edu.year )))}
-((% endfor %))
+
+    \subsection{B.S. in Computer Science}
+    \small\textit{State University} \hfill \textit{2021}
+
 
 \vspace{10pt}
 
 % --- Skills Section (optional, can be flexible) ---
 \section{Skills}
 \begin{itemize}[leftmargin=*,noitemsep,nolistsep]
-    ((% for category, skills_list in skills.items() %))
-        \item \textbf{((( category )))}: ((( skills_list | join(', ') )))
-    ((% endfor %))
+    
+        \item \textbf{Programming Languages}: Python, JavaScript, Java
+    
+        \item \textbf{Frameworks}: Django, React, Spring Boot
+    
+        \item \textbf{Tools}: Git, Docker, AWS
+    
 \end{itemize}
 
 \end{document}
