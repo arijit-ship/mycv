@@ -1,16 +1,26 @@
-cv:
-  type: dict
-  required: true
-  schema:
-    sections:
-      type: list
-      schema:
-        type: dict
-        schema:
-          heading:
-            type: string
-            required: true
-          contents:
-            type: list
-            schema:
-              type: dict   # arbitrary key-value pairs allowed
+About Me:
+  name: str
+  email: str
+  summary: str
+
+Education:
+  degree: str
+  institution: str
+  year: str
+
+Experience:
+  role: str
+  company: str
+  duration: str
+  description:
+    summary: str
+    details: list
+
+Projects:
+  title: str
+  description: str
+  technologies: list
+
+Skills:
+  languages: str
+  tools: str

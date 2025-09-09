@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\begin{document}
+
+{% macro render_item(item) %}
+{% for key, value in item.items() %}
+    {% if value is mapping %}
+\textbf{{ key }}:
+\begin{itemize}[leftmargin=*, noitemsep]
+    {{ render_item(value) }}
+\end{itemize}
+    {% elif value is sequence and value|length > 0 and value[0] is mapping %}
+\textbf{{ key }}:
+\begin{itemize}[leftmargin=*, noitemsep]
+    {% for elem in value %}
+        {{ render_item(elem) }}
+    {% endfor %}
+\end{itemize}
+    {% elif value is sequence %}
+\textbf{{ key }}:
+\begin{itemize}[leftmargin=*, noitemsep]
+    {% for elem in value %}
+        \item {{ escape_latex(elem) }}
+    {% endfor %}
+\end{itemize}
+    {% else %}
+\textbf{{ key }}: {{ escape_latex(value) }} \\
+    {% endif %}
+{% endfor %}
+{% endmacro %}
+
+{% for section in cv %}
+\section*{{ escape_latex(section.heading) }}
+{% for item in section.contents %}
+    {{ render_item(item) }}
+{% endfor %}
+{% endfor %}
+
+\end{document}
